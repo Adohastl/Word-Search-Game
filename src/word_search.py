@@ -2,7 +2,12 @@ import os
 import random
 
 # Persian letters for filling the grid
-PERSIAN_LETTERS = 'اآبپتثجچحخدذرزژسشصضطظعغفقکگلمنوهی'
+PERSIAN_LETTERS = 'ابپتثجچحخدذرزژسشصضطظعغفقکگلمنوهی'
+MAX_PLACEMENT_ATTEMPTS = 100
+MIN_WORD_LENGTH = 2
+OVERLAP_COUNT = 0
+
+
 
 def normalize_word(word):
     """Normalize words."""
@@ -11,16 +16,13 @@ def normalize_word(word):
 def load_words_from_file(file_path):
     """Load words from a given file and normalize them."""
     with open(file_path, 'r', encoding='utf-8') as file:
-        words = [normalize_word(line.strip()) for line in file if len(line.strip()) > 2]
+        words = [normalize_word(line.strip()) for line in file if len(line.strip()) > MIN_WORD_LENGTH]
     return words
 
 def load_bad_words():
     """Load bad words from badwords.txt file."""
-    try:
-        with open("badwords.txt", 'r', encoding='utf-8') as file:
-            return [normalize_word(line.strip()) for line in file if line.strip()]
-    except FileNotFoundError:
-        return []
+    with open("data\\badwords.txt", 'r', encoding='utf-8') as file:
+        return [normalize_word(line.strip()) for line in file if line.strip()]
 
 def choose_category():
     """Allow the user to choose a category file."""
@@ -72,8 +74,9 @@ def can_place_word(word, grid, x, y, dx, dy, placed_positions):
 def place_word(word, grid, placed_positions):
     """Attempt to place a word in the grid."""
     size = len(grid)
-    for _ in range(100):  # Try 100 random positions/directions
+    for _ in range(MAX_PLACEMENT_ATTEMPTS):  # Try random positions/directions
         x, y = random.randint(0, size - 1), random.randint(0, size - 1)
+
         dx, dy = random_direction()
         if can_place_word(word, grid, x, y, dx, dy, placed_positions):
             for i in range(len(word)):
